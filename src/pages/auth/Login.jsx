@@ -20,9 +20,14 @@ export const AdminLogin = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors }
   } = useForm({
-    resolver: zodResolver(loginSchema)
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: 'admin@geocircle.com',
+      password: 'admin123'
+    }
   });
 
   const onSubmit = async (data) => {
