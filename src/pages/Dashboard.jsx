@@ -4,6 +4,16 @@ import { StatusBadge } from '../components/common/StatusBadge';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { Users, UserCheck, UserX, Calendar, CheckCircle2, MapPin, Activity } from 'lucide-react';
 
+const format12Hour = (time24Str) => {
+  if (!time24Str) return '';
+  const [hStr, mStr] = time24Str.split(':');
+  let h = parseInt(hStr, 10);
+  if (isNaN(h)) return time24Str;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${String(h).padStart(2, '0')}:${mStr || '00'} ${ampm}`;
+};
+
 export const AdminDashboard = () => {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +83,7 @@ export const AdminDashboard = () => {
               </p>
             </div>
             <div className="text-xs text-slate-300 font-medium">
-              Window: <span className="font-semibold text-amber-400">{summary.activeMeeting.startTime} - {summary.activeMeeting.endTime}</span> ({summary.activeMeeting.timezone})
+              Window: <span className="font-semibold text-amber-400">{summary.activeMeeting.isTimeWindowOptional ? 'Open Anytime Today' : `${format12Hour(summary.activeMeeting.startTime)} - ${format12Hour(summary.activeMeeting.endTime)}`}</span> ({summary.activeMeeting.timezone})
             </div>
           </div>
         </div>
