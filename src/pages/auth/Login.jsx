@@ -25,8 +25,8 @@ export const AdminLogin = () => {
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'admin@geocircle.com',
-      password: 'admin@123'
+      email: '',
+      password: ''
     }
   });
 

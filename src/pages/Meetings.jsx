@@ -5,7 +5,7 @@ import { Pagination } from '../components/common/Pagination';
 import { Modal } from '../components/common/Modal';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { MapPicker } from '../components/location/MapPicker';
-import { Calendar, Plus, MapPin, Clock, Trash2, Edit2, CheckSquare, Square, Repeat, CalendarDays } from 'lucide-react';
+import { Calendar, Plus, MapPin, Clock, Trash2, Edit2, CheckSquare, Square, Repeat, CalendarDays, Users, ToggleLeft, ToggleRight, UserCheck, CheckCircle2 } from 'lucide-react';
 
 const DAYS = [
   { id: 0, label: 'Sun', full: 'Sunday' },
@@ -51,6 +51,12 @@ export const AdminMeetings = () => {
   });
   const [formError, setFormError] = useState(null);
 
+  // State for Present Users Modal
+  const [isPresentUsersModalOpen, setIsPresentUsersModalOpen] = useState(false);
+  const [selectedMeetingForUsers, setSelectedMeetingForUsers] = useState(null);
+  const [presentUsersData, setPresentUsersData] = useState({ presentUsers: [], presentCount: 0 });
+  const [loadingPresentUsers, setLoadingPresentUsers] = useState(false);
+
   const fetchMeetings = useCallback(async (page = 1) => {
     try {
       setLoading(true);
@@ -68,6 +74,37 @@ export const AdminMeetings = () => {
   useEffect(() => {
     fetchMeetings(1);
   }, [fetchMeetings]);
+
+  const handleToggleCheckInPermission = async (meeting) => {
+    try {
+      const nextStatus = !meeting.checkInEnabled;
+      // Optimistic state update
+      setData((prev) => ({
+        ...prev,
+        meetings: prev.meetings.map((m) => (m._id === meeting._id ? { ...m, checkInEnabled: nextStatus } : m))
+      }));
+      await meetingApi.toggleCheckIn(meeting._id, nextStatus);
+    } catch (err) {
+      console.error('Failed to toggle check-in permission:', err);
+      fetchMeetings(data.page);
+    }
+  };
+
+  const handleOpenPresentUsers = async (meeting) => {
+    setSelectedMeetingForUsers(meeting);
+    setIsPresentUsersModalOpen(true);
+    setLoadingPresentUsers(true);
+    try {
+      const res = await meetingApi.getPresentUsers(meeting._id);
+      if (res.success && res.data) {
+        setPresentUsersData(res.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch present users:', err);
+    } finally {
+      setLoadingPresentUsers(false);
+    }
+  };
 
   const handleOpenCreate = () => {
     setEditingMeeting(null);
@@ -242,9 +279,31 @@ export const AdminMeetings = () => {
                         )}
                       </td>
                       <td className="py-3 px-4">
-                        <StatusBadge status={m.checkInEnabled ? 'ACTIVE' : 'EXPIRED_WINDOW'} text={m.checkInEnabled ? 'ENABLED' : 'DISABLED'} />
+                        <div className="flex items-center space-x-2">
+                          <StatusBadge status={m.checkInEnabled ? 'ACTIVE' : 'EXPIRED_WINDOW'} text={m.checkInEnabled ? 'ENABLED' : 'DISABLED'} />
+                          <button
+                            onClick={() => handleToggleCheckInPermission(m)}
+                            className={`px-2 py-1 rounded-lg text-[11px] font-bold flex items-center space-x-1 border transition ${
+                              m.checkInEnabled
+                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                                : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
+                            }`}
+                            title={m.checkInEnabled ? 'Click to Disable Check-In Permission' : 'Click to Enable Check-In Permission'}
+                          >
+                            {m.checkInEnabled ? <ToggleRight className="w-4 h-4 text-emerald-400" /> : <ToggleLeft className="w-4 h-4 text-slate-500" />}
+                            <span>{m.checkInEnabled ? 'Allowed' : 'Paused'}</span>
+                          </button>
+                        </div>
                       </td>
                       <td className="py-3 px-4 text-right space-x-2">
+                        <button
+                          onClick={() => handleOpenPresentUsers(m)}
+                          className="px-2.5 py-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 font-semibold text-xs transition inline-flex items-center space-x-1"
+                          title="View Currently Present Users"
+                        >
+                          <Users className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>Present Users</span>
+                        </button>
                         <button
                           onClick={() => handleOpenEdit(m)}
                           className="p-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-slate-300 transition"
@@ -553,6 +612,82 @@ export const AdminMeetings = () => {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Modal for Viewing Currently Present Users */}
+      <Modal
+        isOpen={isPresentUsersModalOpen}
+        onClose={() => setIsPresentUsersModalOpen(false)}
+        title={`Currently Present Users (${presentUsersData.presentCount || 0})`}
+      >
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+          <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs">
+            <div>
+              <span className="text-slate-400">Meeting: </span>
+              <strong className="text-amber-400 font-semibold">{selectedMeetingForUsers?.title}</strong>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-slate-400">Status: </span>
+              <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${selectedMeetingForUsers?.checkInEnabled ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
+                {selectedMeetingForUsers?.checkInEnabled ? 'Check-In Allowed' : 'Check-In Paused'}
+              </span>
+            </div>
+          </div>
+
+          {loadingPresentUsers ? (
+            <div className="py-12 text-center">
+              <LoadingSpinner />
+              <p className="text-xs text-slate-400 mt-2">Loading present members list...</p>
+            </div>
+          ) : presentUsersData.presentUsers && presentUsersData.presentUsers.length > 0 ? (
+            <div className="divide-y divide-slate-800 border border-slate-800/80 rounded-xl overflow-hidden bg-slate-950/40">
+              {presentUsersData.presentUsers.map((item) => (
+                <div key={item._id} className="p-3 hover:bg-slate-900/40 transition flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-800 border border-cyan-500/30 overflow-hidden flex items-center justify-center flex-shrink-0 text-cyan-300 font-bold text-sm">
+                      {item.user?.avatar ? (
+                        <img src={item.user.avatar} alt={item.user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        item.user?.name?.substring(0, 2).toUpperCase() || 'US'
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-slate-200 text-xs flex items-center space-x-1.5">
+                        <span>{item.user?.name || 'Unknown User'}</span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      </div>
+                      <div className="text-[11px] text-slate-400">{item.user?.email}</div>
+                      {item.user?.department && (
+                        <div className="text-[10px] text-cyan-400 font-medium">{item.user.department} {item.user?.designation ? `• ${item.user.designation}` : ''}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="text-[11px] font-mono text-emerald-400 font-semibold">
+                      Present ({item.distance !== undefined ? `${Math.round(item.distance)}m away` : 'Verified'})
+                    </div>
+                    <div className="text-[10px] text-slate-400 flex items-center justify-end space-x-1 mt-0.5">
+                      <Clock className="w-3 h-3 text-amber-400" />
+                      <span>{new Date(item.checkedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    {item.userNotes && (
+                      <div className="text-[10px] text-slate-400 italic max-w-[150px] truncate mt-0.5">"{item.userNotes}"</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 text-center bg-slate-900/30 rounded-xl border border-slate-800/60">
+              <Users className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+              <p className="text-xs text-slate-300 font-semibold">No Present Members Yet</p>
+              <p className="text-[11px] text-slate-500 mt-1">
+                No users have submitted a verified check-in for this meeting.
+              </p>
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   );
