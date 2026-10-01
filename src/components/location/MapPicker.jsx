@@ -132,7 +132,7 @@ export const MapPicker = ({ latitude, longitude, radius = 100, onSelectLocation,
       {/* Search Bar & Actions */}
       <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
         <div className="relative flex-1">
-          <form onSubmit={handleSearch} className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
@@ -141,6 +141,13 @@ export const MapPicker = ({ latitude, longitude, radius = 100, onSelectLocation,
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSearch(e);
+                  }
+                }}
                 className="w-full pl-9 pr-4 py-2 rounded-xl glass-input text-xs"
               />
               {isSearching && (
@@ -148,13 +155,14 @@ export const MapPicker = ({ latitude, longitude, radius = 100, onSelectLocation,
               )}
             </div>
             <button
-              type="submit"
+              type="button"
+              onClick={handleSearch}
               disabled={isSearching || !searchQuery.trim()}
               className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs transition disabled:opacity-50"
             >
               Search
             </button>
-          </form>
+          </div>
 
           {showDropdown && searchResults.length > 0 && (
             <div className="absolute z-50 left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl max-h-48 overflow-y-auto">

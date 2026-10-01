@@ -171,10 +171,17 @@ export const AdminMeetings = () => {
     }
 
     try {
+      const payload = {
+        ...formData,
+        radius: Number(formData.radius) || 100,
+        latitude: Number(formData.latitude) || 10.0261,
+        longitude: Number(formData.longitude) || 76.3082
+      };
+
       if (editingMeeting) {
-        await meetingApi.update(editingMeeting._id, formData);
+        await meetingApi.update(editingMeeting._id, payload);
       } else {
-        await meetingApi.create(formData);
+        await meetingApi.create(payload);
       }
       setIsModalOpen(false);
       fetchMeetings(data.page);
@@ -388,7 +395,10 @@ export const AdminMeetings = () => {
                 step="any"
                 required
                 value={formData.latitude}
-                onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, latitude: val === '' ? '' : parseFloat(val) });
+                }}
                 className="w-full px-3 py-2 rounded-xl glass-input text-xs font-mono"
               />
             </div>
@@ -399,7 +409,10 @@ export const AdminMeetings = () => {
                 step="any"
                 required
                 value={formData.longitude}
-                onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, longitude: val === '' ? '' : parseFloat(val) });
+                }}
                 className="w-full px-3 py-2 rounded-xl glass-input text-xs font-mono"
               />
             </div>
@@ -409,8 +422,12 @@ export const AdminMeetings = () => {
                 type="number"
                 min="5"
                 required
+                placeholder="100"
                 value={formData.radius}
-                onChange={(e) => setFormData({ ...formData, radius: parseInt(e.target.value, 10) })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, radius: val === '' ? '' : parseInt(val, 10) });
+                }}
                 className="w-full px-3 py-2 rounded-xl glass-input text-xs font-semibold text-amber-400"
               />
             </div>
