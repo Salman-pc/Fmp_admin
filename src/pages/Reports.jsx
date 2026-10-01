@@ -156,7 +156,9 @@ export const AdminReports = () => {
                       <tr key={r._id} className="hover:bg-slate-900/40 transition">
                         <td className="py-3 px-4 font-semibold text-slate-200">{r.user?.name || 'Unknown User'}</td>
                         <td className="py-3 px-4">{r.meeting?.title}</td>
-                        <td className="py-3 px-4 text-slate-400">{new Date(r.checkedInAt).toLocaleString()}</td>
+                        <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
+                          {new Date(r.checkedInAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}, {new Date(r.checkedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+                        </td>
                         <td className="py-3 px-4 font-mono text-amber-400">{r.distance}m</td>
                         <td className="py-3 px-4 font-mono text-slate-400">~{Math.round(r.accuracy)}m</td>
                         <td className="py-3 px-4">

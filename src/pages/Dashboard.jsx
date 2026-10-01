@@ -105,7 +105,9 @@ export const AdminDashboard = () => {
                   <tr key={item._id} className="hover:bg-slate-900/40 transition">
                     <td className="py-3 px-4 font-semibold text-slate-200">{item.user?.name || 'Unknown User'}</td>
                     <td className="py-3 px-4">{item.meeting?.title}</td>
-                    <td className="py-3 px-4 text-slate-400">{new Date(item.checkedInAt).toLocaleTimeString()}</td>
+                    <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
+                      {new Date(item.checkedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+                    </td>
                     <td className="py-3 px-4 font-mono font-medium text-amber-400">{item.distance}m</td>
                     <td className="py-3 px-4 text-slate-400 font-mono">~{Math.round(item.accuracy)}m</td>
                     <td className="py-3 px-4">
