@@ -59,14 +59,6 @@ export const AdminGamesManagement = () => {
             Isolated feature module. Core presence system functions independently of games status.
           </p>
         </div>
-
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 hover:from-amber-600 hover:to-red-700 text-white font-semibold text-xs shadow-lg shadow-amber-500/20 flex items-center space-x-2 transition"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Game</span>
-        </button>
       </div>
 
       {/* Module Status Banner */}
