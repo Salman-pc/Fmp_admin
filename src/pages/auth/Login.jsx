@@ -26,7 +26,7 @@ export const AdminLogin = () => {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: 'admin@geocircle.com',
-      password: 'admin123'
+      password: 'admin@123'
     }
   });
 
