@@ -48,7 +48,7 @@ export const Sidebar = () => {
       </aside>
 
       {/* Mobile Horizontal Navigation Header Scrollbar (< md screens) */}
-      <div className="md:hidden w-full glass-panel border-b border-slate-800 px-3 py-2 overflow-x-auto no-scrollbar">
+      <div className="md:hidden w-full glass-panel border-b border-slate-800 px-3 py-2 overflow-x-auto no-scrollbar sticky top-16 z-30 backdrop-blur-xl">
         <nav className="flex items-center space-x-2 min-w-max">
           {adminLinks.map((link) => {
             const Icon = link.icon;

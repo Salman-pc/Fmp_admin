@@ -95,7 +95,7 @@ export const AdminReports = () => {
       {activeTab === 'LOGS' ? (
         <div className="space-y-4">
           {/* Filters Bar */}
-          <div className="glass-panel p-4 rounded-xl border border-slate-800 flex flex-wrap items-center gap-4 text-xs">
+          <div className="glass-panel p-4 rounded-xl border border-slate-800 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 text-xs">
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-amber-400" />
               <span className="font-semibold text-slate-300">Filters:</span>
@@ -104,30 +104,30 @@ export const AdminReports = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-lg glass-input bg-slate-900"
+              className="px-3 py-2 rounded-lg glass-input bg-slate-900 text-xs w-full sm:w-auto"
             >
               <option value="">All Statuses</option>
               <option value="PRESENT">PRESENT</option>
               <option value="REJECTED">REJECTED</option>
             </select>
 
-            <div className="flex items-center space-x-2">
-              <span className="text-slate-400">From:</span>
+            <div className="flex items-center space-x-2 w-full sm:w-auto">
+              <span className="text-slate-400 text-xs">From:</span>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="px-3 py-1.5 rounded-lg glass-input bg-slate-900"
+                className="px-3 py-2 rounded-lg glass-input bg-slate-900 text-xs flex-1 sm:w-auto"
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span className="text-slate-400">To:</span>
+            <div className="flex items-center space-x-2 w-full sm:w-auto">
+              <span className="text-slate-400 text-xs">To:</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="px-3 py-1.5 rounded-lg glass-input bg-slate-900"
+                className="px-3 py-2 rounded-lg glass-input bg-slate-900 text-xs flex-1 sm:w-auto"
               />
             </div>
           </div>
