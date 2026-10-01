@@ -108,18 +108,35 @@ export const MapPicker = ({ latitude, longitude, radius = 100, onSelectLocation,
     }
 
     setIsLocating(true);
+    
+    const handleSuccess = (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      onSelectLocation(lat, lon);
+      setIsLocating(false);
+    };
+
+    const handleError = (err) => {
+      alert(`Unable to retrieve your location (${err.message}). Please check site location permissions in your browser.`);
+      setIsLocating(false);
+    };
+
+    // First attempt with high accuracy (GPS)
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        onSelectLocation(lat, lon);
-        setIsLocating(false);
+      handleSuccess,
+      (firstErr) => {
+        // Fallback retry with standard network accuracy (WiFi/IP triangulation for laptops)
+        if (firstErr.code === firstErr.TIMEOUT || firstErr.code === firstErr.POSITION_UNAVAILABLE) {
+          navigator.geolocation.getCurrentPosition(
+            handleSuccess,
+            handleError,
+            { enableHighAccuracy: false, timeout: 25000, maximumAge: 60000 }
+          );
+        } else {
+          handleError(firstErr);
+        }
       },
-      (err) => {
-        alert(`Unable to get your location: ${err.message}`);
-        setIsLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
     );
   };
 
